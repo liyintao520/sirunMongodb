@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<!-- 指定自己定义的validator 开启注解 -->
+	<mvc:annotation-driven />
+	<!-- 配置静态资源，直接映射到对应的文件夹，不被DispatcherServlet处理，3.04新增功能，需要重新设置spring-mvc-3.0.xsd -->
+	<!-- <mvc:resources location="/web/" mapping="/web/**"></mvc:resources> -->
+	<mvc:resources mapping="/img/**" location="/img/" />
+	<mvc:resources mapping="/js/**" location="/js/" />
+	<mvc:resources mapping="/css/**" location="/css/" />
+	<mvc:resources mapping="/html/**" location="/html/" />
+
+	<!-- mappingJacksonHttpMessageConverter ： 用来处理json格式转换 -->
+	<bean
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"
+		id="mappingJacksonHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/html;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!--- StringHttpMessageConverter bean -->
+	<bean id = "stringHttpMessageConverter" class = "org.springframework.http.converter.StringHttpMessageConverter"/>
+	<bean id = "formHttpMessageConverter" class = "org.springframework.http.converter.FormHttpMessageConverter"/>
+	<!-- 启动Spring MVC的注解功能，完成请求和注解POJO的映射 -->
+	<bean id="annotationMethodHandlerAdapter"
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="mappingJacksonHttpMessageConverter" />
+				<!-- 新增的StringMessageConverter bean-->
+                <ref bean= "stringHttpMessageConverter" />
+                <ref bean= "formHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+	<!-- 读取配置文件 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:config.properties</value>
+		</property>
+		<property name="fileEncoding" value="utf-8" />
+	</bean>
+	
+	<!-- 定义跳转的文件的前后缀 ，视图模式配置-->  
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		 <!-- 这里的配置我的理解是自动给后面action的方法return的字符串加上前缀和后缀，变成一个 可用的url地址 -->  
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!-- 拦截器 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean id="loginInterceptor" class="com.sirun.web.interceptor.LoginInterceptor">
+				<property name="inCludeUrls">
+					<list>
+						<value>/login</value>
+						<value>/logout</value>
+						<value>/map-css</value>
+						<value>/assets</value>
+						<value>/css</value>
+						<value>/images</value>
+						<value>/js</value>
+						<value>/img</value>
+						<value>/imgs</value>
+						<value>/</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<!-- 即如果当前路径是/ 则重定向到/web/index  -->
+	<mvc:view-controller path="/" view-name="redirect:/index" />
+</beans>

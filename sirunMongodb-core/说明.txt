@@ -1,0 +1,61 @@
+spring-data-mongodb中的实体映射是通过MongoMappingConverter这个类实现的。它可以通过注释把java类转换为mongodb的文档。
+
+它有以下几种注释：
+@Id - 文档的唯一标识，在mongodb中为ObjectId，它是唯一的，通过时间戳+机器标识+进程ID+自增计数器（确保同一秒内产生的Id不会冲突）构成。
+
+@Document - 把一个java类声明为mongodb的文档，可以通过collection参数指定这个类对应的文档。
+
+@DBRef - 声明类似于关系数据库的关联关系。ps：暂不支持级联的保存功能，当你在本实例中修改了DERef对象里面的值时，单独保存本实例并不能保存DERef引用的对象，它要另外保存，如下面例子的Person和Account。
+
+@Indexed - 声明该字段需要索引，建索引可以大大的提高查询效率。
+
+@CompoundIndex - 复合索引的声明，建复合索引可以有效地提高多字段的查询效率。
+
+@GeoSpatialIndexed - 声明该字段为地理信息的索引。
+
+@Transient - 映射忽略的字段，该字段不会保存到mongodb。
+
+@PersistenceConstructor - 声明构造函数，作用是把从数据库取出的数据实例化为对象。该构造函数传入的值为从DBObject中取出的数据。
+
+
+
+
+
+
+Spring的注解
+1、@controller 控制器（注入服务）
+2、@service 服务（注入dao）
+3、@repository dao（实现dao访问）
+4、@component （把普通pojo实例化到spring容器中，相当于配置文件中的<bean id="" class=""/>）
+
+  @Component,@Service,@Controller,@Repository注解的类，并把这些类纳入进spring容器中管理。 
+下面写这个是引入component的扫描组件 
+<context:component-scan base-package=”com.mmnc”>    
+
+其中base-package为需要扫描的包（含所有子包） 
+       1、@Service用于标注业务层组件 
+       2、@Controller用于标注控制层组件(如struts中的action) 
+       3、@Repository用于标注数据访问组件，即DAO组件. 
+       4、@Component泛指组件，当组件不好归类的时候，我们可以使用这个注解进行标注。    
+           @Service public class UserServiceImpl implements UserService { } 
+           @Repository public class UserDaoImpl implements UserDao { } getBean的默认名称是类名（头字母小写），如果想自定义，可以@Service(“***”)               这样来指定，这种bean默认是单例的，如果想改变，可以使用@Service(“beanName”) 
+           @Scope(“prototype”)来改变。可以使用以下方式指定初始化方法和销毁方法（方法名任意）： @PostConstruct public void init() { } 
+
+
+1. Controller, RestController的共同点
+
+     都是用来表示spring某个类的是否可以接收HTTP请求
+
+2.  Controller, RestController的不同点
+
+     @Controller标识一个Spring类是Spring MVC controller处理器
+
+     @RestController：  a convenience annotation that does nothing more than adding the@Controller and @ResponseBody annotations。  @RestController是@Controller和@ResponseBody的结合体，两个标注合并起来的作用。
+
+示例如下：
+    @Controller  
+    @ResponseBody  
+    public class MyController { }  
+      
+    @RestController  
+    public class MyRestController { }  
